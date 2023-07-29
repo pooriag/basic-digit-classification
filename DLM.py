@@ -25,12 +25,16 @@ class digitLearnerModel(nn.Module):
 
     def predict(self, x):
 
-        output = self.forward(self, x)
+        x_flatten = torch.flatten(x, start_dim=0)
 
-        return torch.argmax(output, 1)
+        output = self.forward(x_flatten)
+        output = output / 10
+        print(output)
+
+        return torch.argmax(output)
 
 
-    def train(self, x, y):
+    def train(self, train_data_loader):
 
         loss_function = nn.CrossEntropyLoss()
 
@@ -38,13 +42,17 @@ class digitLearnerModel(nn.Module):
 
         optimizer = torch.optim.SGD(self.parameters(), lr = learnig_rate)
 
-        epochs = 400
+        epochs = 3000
 
         losses = []
 
         for i in range(epochs):
 
-            y_output = self.forward(x)
+            x, y = next(iter(train_data_loader))
+
+            x_flatts = torch.flatten(x, start_dim=1)
+
+            y_output = self.forward(x_flatts)
 
             loss = loss_function(y_output, y)
 
@@ -55,9 +63,9 @@ class digitLearnerModel(nn.Module):
 
             losses.append(loss.item())
 
-            if i % 100:
+            if i % 100 == 0:
 
                 print(f"loss in {i} epoch is : {loss.item()}")
 
 
-            return losses
+        return losses
