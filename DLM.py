@@ -3,6 +3,8 @@
 import torch
 from torch import nn
 
+import matplotlib.pyplot as plt
+
 class digitLearnerModel(nn.Module):
 
     def __init__(self, resolution):
@@ -10,11 +12,17 @@ class digitLearnerModel(nn.Module):
         super(digitLearnerModel, self).__init__()
 
         self.resolution = resolution
+        self.losses = []
 
         self.layers = nn.Sequential(
-            nn.Linear(resolution[0] * resolution[1], 128),
+            nn.Linear(resolution[0] * resolution[1], 60),
             nn.ReLU(),
-            nn.Linear(128, 10),
+            nn.Linear(60, 15),
+            nn.ReLU(),
+            nn.Linear(15, 15),
+            nn.ReLU(),
+            nn.Linear(15, 10)
+
         )
 
 
@@ -38,13 +46,11 @@ class digitLearnerModel(nn.Module):
 
         loss_function = nn.CrossEntropyLoss()
 
-        learnig_rate = 5 * (1e-2)
+        learnig_rate = (1e-2)
 
         optimizer = torch.optim.SGD(self.parameters(), lr = learnig_rate)
 
-        epochs = 3000
-
-        losses = []
+        epochs = 30000
 
         for i in range(epochs):
 
@@ -61,11 +67,21 @@ class digitLearnerModel(nn.Module):
 
             optimizer.step()
 
-            losses.append(loss.item())
+            self.losses.append(loss.item())
 
             if i % 100 == 0:
 
                 print(f"loss in {i} epoch is : {loss.item()}")
 
 
-        return losses
+        return self.losses
+
+    def plot_losses_with_respect_to_epochs(self):
+
+        plt.figure()
+
+        for i in range(0, len(self.losses)):
+
+            plt.plot(i, self.losses[i], "ro")
+
+        plt.show()

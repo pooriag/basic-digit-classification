@@ -14,28 +14,29 @@ from DLM import digitLearnerModel
 
 warnings.filterwarnings("ignore", category=MatplotlibDeprecationWarning)
 
-train_data = datasets.MNIST(
+model = digitLearnerModel([28, 28])
+
+model.load_state_dict(torch.load("models/digit_model"))
+
+test_data = datasets.MNIST(
     root="data",
     download=False,
-    train=True,
+    train=False,
     transform=Compose([ToTensor(), Grayscale()])
 )
 
-train_dataLoader = DataLoader(train_data, 500, True)
 
-train_batch_images, train_batch_labels = next(iter(train_dataLoader))
-print(train_batch_images[0].size())
+test_dataLoader = DataLoader(test_data, 1000, True)
 
-plt.imshow(train_batch_images[0].squeeze())
-plt.show()
-print(train_data.classes[train_batch_labels[0]])
+test_batch_images, test_batch_labels = next(iter(test_dataLoader))
+i = 0
+for i in range(999):
+    #plt.imshow(test_batch_images[i].squeeze())
+    #plt.show()
+    if test_data.classes[test_batch_labels[i]][0] == (str(model.predict(test_batch_images[i]).item())):
+        i += 1
+        
+
+print(i)
 
 
-
-model = digitLearnerModel([28, 28])
-
-model.train(train_dataLoader)
-
-model.plot_losses_with_respect_to_epochs()
-
-torch.save(model.state_dict(), "models/digit_model")
